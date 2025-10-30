@@ -1,0 +1,7 @@
+project_id = "vfzhxikyqeevmtxnfjwz"
+
+[functions.openproject-proxy]
+verify_jwt = false
+
+[functions.generate-test-cases]
+verify_jwt = false
