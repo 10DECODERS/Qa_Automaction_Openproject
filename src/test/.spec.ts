@@ -1,16 +1,17 @@
-describe('Button', () => {
-  it('should render its label and call the onClick handler when clicked', () => {
+import { render, screen, fireEvent } from '@testing-library/react';
+import Counter from './Counter'; // Assuming the component is in Counter.js/tsx
+
+describe('Counter', () => {
+  it('should increment the count when the Increment button is clicked', () => {
     // Arrange
-    const buttonLabel = 'Submit Form';
-    const handleClick = jest.fn();
+    render(<Counter />);
+    const incrementButton = screen.getByRole('button', { name: /increment/i }); // Case-insensitive match for the button text
 
     // Act
-    render(<Button label={buttonLabel} onClick={handleClick} />);
-    const buttonElement = screen.getByText(buttonLabel);
-    fireEvent.click(buttonElement);
+    fireEvent.click(incrementButton);
 
     // Assert
-    expect(buttonElement).toBeInTheDocument();
-    expect(handleClick).toHaveBeenCalledTimes(1);
+    // Assuming the component displays "Count: X"
+    expect(screen.getByText('Count: 1')).toBeInTheDocument();
   });
 });
