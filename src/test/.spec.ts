@@ -1,17 +1,14 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import Counter from './Counter'; // Assuming the component is in Counter.js/tsx
+import { capitalizeFirstLetter } from './utils'; // Assuming this utility function exists in a 'utils' file
 
-describe('Counter', () => {
-  it('should increment the count when the Increment button is clicked', () => {
+describe('capitalizeFirstLetter', () => {
+  it('should capitalize the first letter of a given string', () => {
     // Arrange
-    render(<Counter />);
-    const incrementButton = screen.getByRole('button', { name: /increment/i }); // Case-insensitive match for the button text
+    const input = 'hello world';
 
     // Act
-    fireEvent.click(incrementButton);
+    const result = capitalizeFirstLetter(input);
 
     // Assert
-    // Assuming the component displays "Count: X"
-    expect(screen.getByText('Count: 1')).toBeInTheDocument();
+    expect(result).toBe('Hello world');
   });
 });
