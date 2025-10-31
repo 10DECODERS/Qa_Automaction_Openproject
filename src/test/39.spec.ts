@@ -1,4 +1,4 @@
-"fileContent": "="fileContent": "="fileContent": "="fileContent": "="fileContent": "=import { render, screen } from '@testing-library/react';
+"fileContent": "="fileContent": "="fileContent": "="fileContent": "="fileContent": "="fileContent": "=import { render, screen } from '@testing-library/react';
 import LoginForm from '../LoginForm'; // Assuming LoginForm is the component that renders the password field
 
 describe('LoginForm', () => {
@@ -81,5 +81,24 @@ describe('LoginComponent', () => {
     // Assert
     expect(mockNavigate).toHaveBeenCalledTimes(1);
     expect(mockNavigate).toHaveBeenCalledWith('/password-recovery');
+  });
+});"
+
+import { render, screen } from '@testing-library/react';
+import LoginPage from './LoginPage'; // Assuming LoginPage component is in a file LoginPage.js/jsx
+
+describe('LoginPage', () => {
+  it('should display the error message area with the provided error', () => {
+    // Arrange
+    const testErrorMessage = 'Invalid username or password.';
+    const mockOnSubmit = jest.fn();
+
+    // Act
+    render(<LoginPage onSubmit={mockOnSubmit} errorMessage={testErrorMessage} />);
+
+    // Assert
+    const errorMessageElement = screen.getByTestId('error-message');
+    expect(errorMessageElement).toBeInTheDocument();
+    expect(errorMessageElement).toHaveTextContent(testErrorMessage);
   });
 });"
