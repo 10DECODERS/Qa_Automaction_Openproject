@@ -42,6 +42,7 @@ const TicketDetail = () => {
   const [loading, setLoading] = useState(true);
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [generatingTests, setGeneratingTests] = useState(false);
+  const [approvingTestCaseId, setApprovingTestCaseId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("All");
 
   useEffect(() => {
@@ -357,7 +358,9 @@ const TicketDetail = () => {
                       <div className="flex gap-3">
                         <Button
                           className="bg-green-600 hover:bg-green-700 text-white"
+                          disabled={approvingTestCaseId === testCase.id}
                           onClick={async () => {
+                            setApprovingTestCaseId(testCase.id);
                             try {
                               // Generate unique tc_id
                               const tc_id = `TC-${ticketId}-${Date.now()}`;
@@ -410,11 +413,22 @@ const TicketDetail = () => {
                                 console.error("Error approving test case:", error);
                                 toast.error("Failed to approve test case");
                               }
+                            } finally {
+                              setApprovingTestCaseId(null);
                             }
                           }}
                         >
-                          <CheckCircle2 className="h-4 w-4 mr-2" />
-                          Approve
+                          {approvingTestCaseId === testCase.id ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Approving...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="h-4 w-4 mr-2" />
+                              Approve
+                            </>
+                          )}
                         </Button>
                         <Button 
                           className="bg-red-600 hover:bg-red-700 text-white"
