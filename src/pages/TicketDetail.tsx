@@ -102,6 +102,8 @@ const TicketDetail = () => {
 
     setGeneratingTests(true);
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10 * 60 * 1000); // 10 minutes
       const response = await fetch("https://n8n.inside10d.com/webhook/75409c62-f8c5-49e0-8329-23585fcfc9ba", {
         method: "POST",
         headers: {
@@ -110,14 +112,16 @@ const TicketDetail = () => {
         body: JSON.stringify({
           id: ticketId
         }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error("Failed to generate test cases");
       }
 
       const data = await response.json();
-      
+
       if (data && data[0]?.output) {
         const transformedTestCases: TestCase[] = data[0].output.map((item: any, index: number) => ({
           id: `TC-${ticketId}-${index + 1}`,
@@ -129,13 +133,18 @@ const TicketDetail = () => {
           expectedResult: item.description,
           status: "Pending"
         }));
-        
+
         setTestCases(transformedTestCases);
         toast.success(`Generated ${transformedTestCases.length} test cases`);
       }
     } catch (error) {
-      console.error("Error generating test cases:", error);
-      toast.error("Failed to generate test cases");
+      if (error.name === 'AbortError') {
+        console.error("Request timed out:", error);
+        toast.error("Request timed out after 10 minutes");
+      } else {
+        console.error("Error generating test cases:", error);
+        toast.error("Failed to generate test cases");
+      }
     } finally {
       setGeneratingTests(false);
     }
@@ -346,14 +355,16 @@ const TicketDetail = () => {
                       </p>
                     ) : (
                       <div className="flex gap-3">
-                        <Button 
+                        <Button
                           className="bg-green-600 hover:bg-green-700 text-white"
                           onClick={async () => {
                             try {
                               // Generate unique tc_id
                               const tc_id = `TC-${ticketId}-${Date.now()}`;
-                              
-                              // Make first API call
+
+                              // Make first API call with timeout
+                              const controller1 = new AbortController();
+                              const timeoutId1 = setTimeout(() => controller1.abort(), 10 * 60 * 1000); // 10 minutes
                               const approveResponse = await fetch("https://n8n.inside10d.com/webhook/75fd5ddb-6bff-484a-bd69-b9a048b34aa5", {
                                 method: "POST",
                                 headers: {
@@ -367,28 +378,38 @@ const TicketDetail = () => {
                                   title: testCase.title,
                                   status: "Approved"
                                 }),
+                                signal: controller1.signal,
                               });
-
+                              clearTimeout(timeoutId1);
                               const approveData = await approveResponse.json();
 
-                              // Make second API call with the response from first call
+                              // Make second API call with the response from first call and increased timeout
+                              const controller2 = new AbortController();
+                              const timeoutId2 = setTimeout(() => controller2.abort(), 10 * 60 * 1000); // 10 minutes
                               await fetch("https://n8n.inside10d.com/webhook/openproject-new-ticket", {
                                 method: "POST",
                                 headers: {
                                   "Content-Type": "application/json",
                                 },
                                 body: JSON.stringify(approveData),
+                                signal: controller2.signal,
                               });
+                              clearTimeout(timeoutId2);
 
                               // Update local state
-                              const updatedCases = testCases.map(tc => 
+                              const updatedCases = testCases.map(tc =>
                                 tc.id === testCase.id ? { ...tc, status: "Approved" } : tc
                               );
                               setTestCases(updatedCases);
                               toast.success("Test case approved");
                             } catch (error) {
-                              console.error("Error approving test case:", error);
-                              toast.error("Failed to approve test case");
+                              if (error.name === 'AbortError') {
+                                console.error("Request timed out:", error);
+                                toast.error("Request timed out after 10 minutes");
+                              } else {
+                                console.error("Error approving test case:", error);
+                                toast.error("Failed to approve test case");
+                              }
                             }
                           }}
                         >
