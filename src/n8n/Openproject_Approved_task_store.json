@@ -1,0 +1,238 @@
+{
+  "name": "Openproject_Approved_task_store",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "75fd5ddb-6bff-484a-bd69-b9a048b34aa5",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "2dc0fedc-1322-48e8-901e-fc53148806aa",
+      "name": "Webhook",
+      "webhookId": "75fd5ddb-6bff-484a-bd69-b9a048b34aa5"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "task_summary",
+          "mode": "list",
+          "cachedResultName": "task_summary"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "task_id": "={{ $json.body.task_id }}",
+            "tc_id": "={{ $json.body.tc_id }}",
+            "tc": "={{ $json.body.tc_text }}",
+            "description": "={{ $json.body.description }}",
+            "title": "={{ $json.body.title }}",
+            "status": "={{ $json.body.status }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "task_id",
+              "displayName": "task_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tc_id",
+              "displayName": "tc_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tc",
+              "displayName": "tc",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        224,
+        -16
+      ],
+      "id": "e1885270-44c4-471f-94ed-dbb81b50afb1",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "hrGDYMHTYQbnHdaZ",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://dev-openproject.inside10d.com/api/v3/projects/7/work_packages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Basic YXBpa2V5OmIyYjQwYzM2NjZmNzZlYmY3OGI5M2I2NmJiZDBjNmNiYTc2ZWJkYTQzYjU5NWIxZmI5MTNkYjQxZjA4MTNjNWU="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"subject\":\"{{ $json.title }}\" ,\n  \"description\": {\n    \"raw\": \"{{ $json.description }}\"\n  },\n  \"_links\": {\n    \"type\": {\n      \"href\": \"/api/v3/types/1\"\n    },\n    \"parent\": {\n      \"href\": \"/api/v3/work_packages/{{ $json.task_id }}\"\n    }\n  }\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        -16
+      ],
+      "id": "43837565-ea01-4e53-8f59-45e8e98bff71",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input from previous node (HTTP Request)\nconst items = $input.all();\n\n// For each item, parse the stringified JSON in \"data\"\nreturn items.map(item => {\n  // Parse the JSON string into an actual object\n  const parsedData = JSON.parse(item.json.data);\n\n  // Return cleaned JSON\n  return {\n    json: parsedData\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -16
+      ],
+      "id": "89c2f10a-ac45-4c78-a7a3-b240a339f2d9",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        848,
+        -16
+      ],
+      "id": "771ba032-f938-48d2-9b27-a82f4d294005",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ebee0732-0f0c-4d3e-80be-142231cdeade",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c56517b2e497ed6ed05a6205c8b153dc2ed2dae047d1c01eebeacc6e6668076d"
+  },
+  "id": "3lOAMgrjBXWeUJI5",
+  "tags": []
+}

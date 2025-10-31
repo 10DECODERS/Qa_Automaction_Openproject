@@ -1,0 +1,198 @@
+{
+  "name": "Qa_Automaction_Openproject_Task_generater",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "75409c62-f8c5-49e0-8329-23585fcfc9ba",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        -16
+      ],
+      "id": "9e4d02ec-25c1-4161-a108-779cad8e5f8a",
+      "name": "Webhook",
+      "webhookId": "75409c62-f8c5-49e0-8329-23585fcfc9ba"
+    },
+    {
+      "parameters": {
+        "url": "=https://dev-openproject.inside10d.com/api/v3/work_packages/{{ $json.body.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -80,
+        -16
+      ],
+      "id": "aa463524-4f25-4021-9e46-e5865a0ddbf7",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "AzSEP4bN1WvnhCEa",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  let parsed;\n\n  try {\n    // Parse the stringified JSON inside \"data\"\n    parsed = JSON.parse(item.json.data);\n  } catch (e) {\n    parsed = { error: \"Invalid JSON\", original: item.json.data };\n  }\n\n  return { json: parsed };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        -16
+      ],
+      "id": "0d24d5f1-ce53-410d-865d-d7219465ed14",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert QA Engineer. Your task is to generate a comprehensive set of test cases based on the user story and acceptance criteria provided below.\n\nThe test cases must be derived strictly from the acceptance criteria. For each criterion, create test cases that cover positive paths (happy paths), negative paths (error conditions), and any relevant edge cases.\n\nUser Story & Acceptance Criteria Input:\n{{ $json.description.raw }}\n\nRequired Output Format:\nGenerate the response in the exact format below as a JSON array of objects.\nEach object must have:\n- \"title\": a concise name of the test case\n- \"description\": a detailed explanation of the test case\n\nDo not include any introductory text, explanations, or summaries.\n\nExample format:\n[\n  {\n    \"title\": \"Valid username and password combination\",\n    \"description\": \"Verify successful login with a username of 9 alphanumeric and special characters, and a valid password meeting all criteria.\"\n  },\n  {\n    \"title\": \"Username exactly 8 characters\",\n    \"description\": \"Verify login fails when the username is exactly 8 characters long, even if it contains valid character types, and a valid password.\"\n  }\n]",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        -16
+      ],
+      "id": "95efaa38-6716-453e-b9ee-caa2c3df4d28",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        336,
+        160
+      ],
+      "id": "61454120-f24d-433e-9d21-7cb3a13aaf94",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GwfTZhuoFFpnaFB4",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  let cleaned = item.json.output;\n\n  // Step 1: Remove Markdown code block wrappers like ```json ... ```\n  cleaned = cleaned.replace(/```json\\n?/, '').replace(/```$/, '').trim();\n\n  let parsed;\n  try {\n    // Step 2: Parse the stringified JSON\n    parsed = JSON.parse(cleaned);\n  } catch (e) {\n    parsed = { error: \"Invalid JSON format\", original: cleaned };\n  }\n\n  // Step 3: Return parsed JSON\n  return { json: { output: parsed } };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        -16
+      ],
+      "id": "7ad6f1fd-b261-4b1a-9f80-c4b6bf7d17eb",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        880,
+        -16
+      ],
+      "id": "1a7429bb-1377-44a9-b7d4-7ac798a7bc93",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b97d3613-9d0e-4c0d-8a2b-84f2e54a982e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c56517b2e497ed6ed05a6205c8b153dc2ed2dae047d1c01eebeacc6e6668076d"
+  },
+  "id": "kw5ZBsepdruExYSM",
+  "tags": []
+}

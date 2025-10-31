@@ -1,0 +1,365 @@
+{
+  "name": "Qa_Generate_test_case_to_git",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "openproject-new-ticket",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        96
+      ],
+      "id": "0ee54ea2-4a2c-4a1c-ac4a-e9c0085514cc",
+      "name": "Webhook",
+      "webhookId": "79a31701-92cd-4dc9-8c4b-cfd81ea1fca3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert software engineer specializing in automated testing. Your task is to generate a concise and effective unit test case for a given feature description, using the specified language and testing framework.\n\nContext\nFeature Description: {{ $json.body[0].subject }} , {{ $json.body[0].description.raw }}\n- Language: [e.g., React]\n\n- Framework: [e.g., Jest]\n\nInstructions\nAnalyze: Carefully analyze the provided feature description to understand its core functionality.\n\nIdentify: Pinpoint the main function, method, or component that requires testing.\n\nGenerate Test: Write a single, minimal unit test to validate this core logic.\n\nMock Data: Create simple mock data if necessary for the test case.\n\nBest Practices: Adhere to modern best practices for naming conventions, assertions, and overall test structure.\n\nOutput Requirements\nProvide only the raw code for the unit test.\n\nDo not include any explanations, introductory text, or markdown code fences (like ```javascript).\n\nThe output must be formatted to be directly pasted into a test file (e.g., a .spec.ts file).\n\ndescribe('functionName', () => {\n  it('should [expected behavior when condition]', () => {\n    // Arrange\n    const input = /* ...mock data... */;\n\n    // Act\n    const result = functionName(input);\n\n    // Assert\n    expect(result).toBe(/* ...expected output... */);\n  });\n});",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        -96,
+        96
+      ],
+      "id": "6974f954-a4b4-481e-a6b0-0fdf5634dda7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        320
+      ],
+      "id": "69056e01-d2a3-41da-a326-dad7e6f6e47a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GwfTZhuoFFpnaFB4",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/10DECODERS",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Qa_Automaction_Openproject",
+          "mode": "list",
+          "cachedResultName": "Qa_Automaction_Openproject",
+          "cachedResultUrl": "https://github.com/10DECODERS/Qa_Automaction_Openproject"
+        },
+        "filePath": "=src/test/{{ $('Webhook').item.json.body[0].id }}.spec.ts",
+        "fileContent": "={{ $('AI Agent').item.json.output }}",
+        "commitMessage": "Added New Test Case from JIRA",
+        "additionalParameters": {
+          "branch": {
+            "branch": "master"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        192
+      ],
+      "id": "811ec242-777b-440e-9844-87552e9fefed",
+      "name": "Create a file1",
+      "webhookId": "42b3979d-1424-4e32-b1d2-133ac8b19e39",
+      "credentials": {
+        "githubApi": {
+          "id": "piEurmbiCVRjacja",
+          "name": "GitHub account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/10DECODERS",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Qa_Automaction_Openproject",
+          "mode": "list",
+          "cachedResultName": "Qa_Automaction_Openproject",
+          "cachedResultUrl": "https://github.com/10DECODERS/Qa_Automaction_Openproject"
+        },
+        "filePath": "=src/test/{{ $('Webhook').item.json.body[0].id }}.spec.ts",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        304,
+        96
+      ],
+      "id": "f2ee49c7-1abe-4fd7-9bf8-7a23ac7740f3",
+      "name": "Get a file",
+      "webhookId": "3ffdf61f-3fce-4287-a176-d8f992c6d98e",
+      "credentials": {
+        "githubApi": {
+          "id": "piEurmbiCVRjacja",
+          "name": "GitHub account 2"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/10DECODERS",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Qa_Automaction_Openproject",
+          "mode": "list",
+          "cachedResultName": "Qa_Automaction_Openproject",
+          "cachedResultUrl": "https://github.com/10DECODERS/Qa_Automaction_Openproject"
+        },
+        "filePath": "=src/test/{{ $('Webhook').item.json.body[0].id }}.spec.ts",
+        "fileContent": "={{ $json.data }}",
+        "commitMessage": "Update the existing fie for test suite",
+        "additionalParameters": {
+          "branch": {
+            "branch": "master"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        0
+      ],
+      "id": "d0dd492d-1eaf-4f41-9711-09e0131be799",
+      "name": "Edit a file1",
+      "webhookId": "718cf8e5-90a3-4036-8a35-c9dcf504aabb",
+      "credentials": {
+        "githubApi": {
+          "id": "piEurmbiCVRjacja",
+          "name": "GitHub account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "var text = Buffer.from($input.first().json.content, 'base64').toString('utf8');\nreturn {\"data\": text};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        0
+      ],
+      "id": "476c6e27-8013-4cf3-918b-2050734013e7",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://dev-openproject.inside10d.com/api/v3/work_packages/{{ $('Webhook').item.json.body[0].id }}/activities ",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Basic YXBpa2V5OmIyYjQwYzM2NjZmNzZlYmY3OGI5M2I2NmJiZDBjNmNiYTc2ZWJkYTQzYjU5NWIxZmI5MTNkYjQxZjA4MTNjNWU="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"comment\": {\n    \"raw\": \"Test case updated: '{{ $json.content.name }}'.\\nPath: {{ $json.content.path }}\\nURL: {{ $json.content.url }}\"\n  }\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        976,
+        96
+      ],
+      "id": "98c235b2-a478-4b03-a116-461bf1d399cb",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1424,
+        96
+      ],
+      "id": "2796b5bd-08f1-42e5-a37e-57159f87e6fc",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: the incoming data array (from HTTP Request, etc.)\nconst items = $input.all();\n\n// Transform each item\nreturn items.map(item => {\n  // Parse the string inside \"data\"\n  const parsedData = JSON.parse(item.json.data);\n\n  return {\n    json: {\n      id: parsedData.id,\n      type: parsedData._type,\n      comment_raw: parsedData.comment.raw,\n      comment_html: parsedData.comment.html,\n      workPackageId: parsedData._links.workPackage?.href.split('/').pop(),\n      workPackageTitle: parsedData._links.workPackage?.title,\n      userId: parsedData._links.user?.href.split('/').pop(),\n      createdAt: parsedData.createdAt,\n      updatedAt: parsedData.updatedAt\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        96
+      ],
+      "id": "5757ebf1-478c-4db8-b354-5d1325319d3a",
+      "name": "Code2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a file1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit a file1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Edit a file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a17496a9-2a81-420e-b6bd-d03fd368fb0f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c56517b2e497ed6ed05a6205c8b153dc2ed2dae047d1c01eebeacc6e6668076d"
+  },
+  "id": "Vmcbq7BL1Vkp1C1v",
+  "tags": []
+}
