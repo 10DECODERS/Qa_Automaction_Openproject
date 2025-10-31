@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+"fileContent": "=import { render, screen } from '@testing-library/react';
 import LoginForm from '../LoginForm'; // Assuming LoginForm is the component that renders the password field
 
 describe('LoginForm', () => {
@@ -13,4 +13,4 @@ describe('LoginForm', () => {
     expect(passwordInputField).toBeInTheDocument();
     expect(passwordInputField).toHaveAttribute('type', 'password');
   });
-});
+});"
