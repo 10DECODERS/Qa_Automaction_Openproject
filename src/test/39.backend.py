@@ -34,3 +34,19 @@ def test_login_fails_missing_uppercase_password():
 
     assert result['success'] is False
     assert result['message'] == 'Invalid username or password. Please try again.'
+
+# ========================================
+# Test Case Added: Login fails with password missing lowercase letter
+# Generated: 2025-11-01T09:23:34.224Z
+
+
+# ========================================
+
+import pytest
+from my_app.auth.service import login_user
+def test_login_fails_with_password_missing_lowercase():
+    username = 'testuser'
+    password_no_lowercase = 'PASSWORD123!'
+    result = login_user(username, password_no_lowercase)
+    assert result['success'] is False
+    assert result['message'] == 'Invalid username or password. Please try again.'
