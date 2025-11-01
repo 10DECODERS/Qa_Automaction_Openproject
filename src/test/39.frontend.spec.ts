@@ -58,3 +58,34 @@ describe('LoginForm', () => {
     global.fetch.mockRestore();
   });
 });
+
+// ========================================
+// Test Case Added: Login fails with password missing lowercase letter
+// Generated: 2025-11-01T09:23:32.722Z
+
+
+// ========================================
+
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import Login from './Login';
+global.fetch = jest.fn();
+describe('Login Component', () => {
+  beforeEach(() => {
+    fetch.mockClear();
+  });
+  it('should display error when login fails due to password missing lowercase', async () => {
+    fetch.mockResponseOnce(JSON.stringify({ message: 'Invalid username or password. Please try again.' }), { status: 401 });
+    render(<Login />);
+    const usernameInput = screen.getByLabelText(/username/i);
+    const passwordInput = screen.getByLabelText(/password/i);
+    const loginButton = screen.getByRole('button', { name: /login/i });
+    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
+    fireEvent.change(passwordInput, { target: { value: 'PASSWORD123!' } });
+    fireEvent.click(loginButton);
+    await waitFor(() => {
+      expect(screen.getByText('Invalid username or password. Please try again.')).toBeInTheDocument();
+    });
+  });
+});
