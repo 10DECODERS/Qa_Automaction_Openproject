@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -320,
-        96
+        -3680,
+        16
       ],
       "id": "0ee54ea2-4a2c-4a1c-ac4a-e9c0085514cc",
       "name": "Webhook",
@@ -21,16 +21,16 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are an expert software engineer specializing in automated testing. Your task is to generate a concise and effective unit test case for a given feature description, using the specified language and testing framework.\n\nContext\nFeature Description: {{ $json.body[0].subject }} , {{ $json.body[0].description.raw }}\n- Language: [e.g., React]\n\n- Framework: [e.g., Jest]\n\nInstructions\nAnalyze: Carefully analyze the provided feature description to understand its core functionality.\n\nIdentify: Pinpoint the main function, method, or component that requires testing.\n\nGenerate Test: Write a single, minimal unit test to validate this core logic.\n\nMock Data: Create simple mock data if necessary for the test case.\n\nBest Practices: Adhere to modern best practices for naming conventions, assertions, and overall test structure.\n\nOutput Requirements\nProvide only the raw code for the unit test.\n\nDo not include any explanations, introductory text, or markdown code fences (like ```javascript).\n\nThe output must be formatted to be directly pasted into a test file (e.g., a .spec.ts file).\n\ndescribe('functionName', () => {\n  it('should [expected behavior when condition]', () => {\n    // Arrange\n    const input = /* ...mock data... */;\n\n    // Act\n    const result = functionName(input);\n\n    // Assert\n    expect(result).toBe(/* ...expected output... */);\n  });\n});",
+        "text": "=You are an expert software engineer specializing in automated testing. Your task is to generate two concise and effective unit tests for the same feature:\n\nFrontend test using React + Jest\n\nBackend test using Python + pytest\n\nContext\nFeature Description: {{ $json.body[0].subject }} , {{ $json.body[0].description.raw }}\n\nInstructions\n\nAnalyze the feature description to understand its core functionality.\n**Do NOT** include Markdown, code blocks (no ```), explanations, or comments outside the code.\nIdentify the main function, method, or component that requires testing.\n\nGenerate two minimal unit tests in a single response:\n\nFrontend (React + Jest)\n\nBackend (Python + pytest)\n\nCreate simple mock data if necessary.\n\nFollow modern best practices for naming conventions, assertions, and test structure.\n\nOutput Requirements\n{\n  \"frontend\": \"<frontend test code>\",\n  \"backend\": \"<backend test code>\"\n}\n\nProvide raw code only, formatted to be directly pasted into test files.\n\nInclude both tests in the same response, frontend first, then backend.\n\nDo not include explanations, comments, or markdown formatting.\n\nExample Structures\n\nFrontend (React + Jest)\n\ndescribe('functionName', () => {\nit('should [expected behavior]', () => {\n// Arrange\nconst input = /* ...mock data... */;\n\n// Act\nconst result = functionName(input);\n\n// Assert\nexpect(result).toBe(/* ...expected output... */);\n});\n});\n\n\nBackend (Python + pytest)\n\ndef test_function_name():\n# Arrange\ninput_data = /* ...mock data... */\n\n// Act\nresult = function_name(input_data)\n\n// Assert\nassert result == /* ...expected output... */\n\nProvide raw code only, formatted to be directly pasted into test files.\nImportant: Always return both tests in one execution, starting with the frontend test followed by the backend test.",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.1,
       "position": [
-        -96,
-        96
+        -3392,
+        16
       ],
-      "id": "6974f954-a4b4-481e-a6b0-0fdf5634dda7",
+      "id": "63b314f2-c459-4418-b650-3bb35fb81628",
       "name": "AI Agent"
     },
     {
@@ -40,10 +40,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        0,
-        320
+        -3296,
+        256
       ],
-      "id": "69056e01-d2a3-41da-a326-dad7e6f6e47a",
+      "id": "00d812e8-5d25-4669-9d08-5070d114b1b0",
       "name": "Google Gemini Chat Model",
       "credentials": {
         "googlePalmApi": {
@@ -54,43 +54,77 @@
     },
     {
       "parameters": {
-        "resource": "file",
-        "owner": {
-          "__rl": true,
-          "value": "https://github.com/10DECODERS",
-          "mode": "url"
-        },
-        "repository": {
-          "__rl": true,
-          "value": "Qa_Automaction_Openproject",
-          "mode": "list",
-          "cachedResultName": "Qa_Automaction_Openproject",
-          "cachedResultUrl": "https://github.com/10DECODERS/Qa_Automaction_Openproject"
-        },
-        "filePath": "=src/test/{{ $('Webhook').item.json.body[0].id }}.spec.ts",
-        "fileContent": "={{ $('AI Agent').item.json.output }}",
-        "commitMessage": "Added New Test Case from JIRA",
-        "additionalParameters": {
-          "branch": {
-            "branch": "master"
-          }
-        }
+        "jsCode": "const aiOutput = JSON.parse($node[\"AI Agent\"].json.output);\nreturn [\n  { json: { type: \"frontend\", code: aiOutput.frontend } },\n  { json: { type: \"backend\", code: aiOutput.backend } }\n];"
       },
-      "type": "n8n-nodes-base.github",
-      "typeVersion": 1.1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        752,
-        192
+        -3072,
+        16
       ],
-      "id": "811ec242-777b-440e-9844-87552e9fefed",
-      "name": "Create a file1",
-      "webhookId": "42b3979d-1424-4e32-b1d2-133ac8b19e39",
-      "credentials": {
-        "githubApi": {
-          "id": "piEurmbiCVRjacja",
-          "name": "GitHub account 2"
-        }
-      }
+      "id": "e05b3a0b-f2e6-4141-ae5d-11e45cdedcba",
+      "name": "Split Frontend and Backend"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "frontend",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "frontend"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "backend",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "backend"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        -2832,
+        16
+      ],
+      "id": "2a4f877d-c5e0-4156-a635-22606db5d1cd",
+      "name": "Route by Type"
     },
     {
       "parameters": {
@@ -108,26 +142,235 @@
           "cachedResultName": "Qa_Automaction_Openproject",
           "cachedResultUrl": "https://github.com/10DECODERS/Qa_Automaction_Openproject"
         },
-        "filePath": "=src/test/{{ $('Webhook').item.json.body[0].id }}.spec.ts",
+        "filePath": "=src/test/{{ $('Webhook').item.json.body[0]._embedded.parent.id }}.frontend.spec.ts",
         "asBinaryProperty": false,
         "additionalParameters": {}
       },
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        304,
-        96
+        -2592,
+        -160
       ],
-      "id": "f2ee49c7-1abe-4fd7-9bf8-7a23ac7740f3",
-      "name": "Get a file",
-      "webhookId": "3ffdf61f-3fce-4287-a176-d8f992c6d98e",
+      "id": "f958422c-b7d5-4691-8a3b-0f86915a8353",
+      "name": "Get Frontend File",
+      "webhookId": "9e2c3084-0a14-480c-9b8c-cbd8241d882c",
       "credentials": {
         "githubApi": {
           "id": "piEurmbiCVRjacja",
           "name": "GitHub account 2"
         }
       },
-      "onError": "continueErrorOutput"
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/10DECODERS",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Qa_Automaction_Openproject",
+          "mode": "list",
+          "cachedResultName": "Qa_Automaction_Openproject",
+          "cachedResultUrl": "https://github.com/10DECODERS/Qa_Automaction_Openproject"
+        },
+        "filePath": "=src/test/{{ $('Webhook').item.json.body[0]._embedded.parent.id }}.backend.py",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -2592,
+        176
+      ],
+      "id": "a3537f76-ea40-4ed9-a72c-396763b278f7",
+      "name": "Get Backend File",
+      "webhookId": "cc74c688-ad24-49a7-be4d-4b7dbd1cf9e2",
+      "credentials": {
+        "githubApi": {
+          "id": "piEurmbiCVRjacja",
+          "name": "GitHub account 2"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "id": "28585861-ec3a-4c14-b754-6a689c8d3034"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2352,
+        -160
+      ],
+      "id": "fb158bec-e254-4755-a671-517a9fcdfb4b",
+      "name": "Frontend File Exists?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2352,
+        176
+      ],
+      "id": "eef50573-eca1-4d3c-b530-6b70299d5cac",
+      "name": "Backend File Exists?"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/10DECODERS",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Qa_Automaction_Openproject",
+          "mode": "list",
+          "cachedResultName": "Qa_Automaction_Openproject",
+          "cachedResultUrl": "https://github.com/10DECODERS/Qa_Automaction_Openproject"
+        },
+        "filePath": "=src/test/{{ $('Webhook').item.json.body[0]._embedded.parent.id }}.frontend.spec.ts",
+        "fileContent": "={{ $('Route by Type').item.json.code }}",
+        "commitMessage": "=Created Frontend Test File - Ticket #{{ $('Webhook').item.json.body[0]._embedded.parent.id }}",
+        "additionalParameters": {
+          "branch": {
+            "branch": "master"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -2112,
+        -256
+      ],
+      "id": "9728c10f-0f87-4e52-adc5-05b5f63bb1e7",
+      "name": "Create Frontend File",
+      "webhookId": "714c009e-72be-441b-8e35-ca1b2aae37a4",
+      "credentials": {
+        "githubApi": {
+          "id": "piEurmbiCVRjacja",
+          "name": "GitHub account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/10DECODERS",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Qa_Automaction_Openproject",
+          "mode": "list",
+          "cachedResultName": "Qa_Automaction_Openproject",
+          "cachedResultUrl": "https://github.com/10DECODERS/Qa_Automaction_Openproject"
+        },
+        "filePath": "=src/test/{{ $('Webhook').item.json.body[0]._embedded.parent.id }}.backend.py",
+        "fileContent": "={{ $('Route by Type').item.json.code }}",
+        "commitMessage": "=Created Backend Test File - Ticket #{{ $('Webhook').item.json.body[0]._embedded.parent.id }}",
+        "additionalParameters": {
+          "branch": {
+            "branch": "master"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -2112,
+        80
+      ],
+      "id": "a0b376b0-6510-4956-8318-62a20dbe465d",
+      "name": "Create Backend File",
+      "webhookId": "a1ee8d55-5fe0-4928-837a-636b2c74c324",
+      "credentials": {
+        "githubApi": {
+          "id": "piEurmbiCVRjacja",
+          "name": "GitHub account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const existingContent = Buffer.from($('Get Frontend File').item.json.content, 'base64').toString('utf8');\nconst newContent = $('Route by Type').item.json.code;\nconst sha = $('Get Frontend File').item.json.sha;\n\n// Add separator and ticket info\nconst separator = \"\\n\\n// ========================================\\n\";\nconst ticketInfo = `// Test Case Added: ${$('Webhook').item.json.body[0].subject}\\n`;\nconst timestamp = `// Generated: ${new Date().toISOString()}\\n`;\nconst fullSeparator = separator + ticketInfo + timestamp + separator + \"\\n\";\n\nconst combined = existingContent + fullSeparator + newContent;\n\nreturn { \n  json: { \n    fileContent: combined,\n    sha: sha\n  } \n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2112,
+        -48
+      ],
+      "id": "ae23e1ee-18b9-4883-8555-31c7750ccc01",
+      "name": "Append Frontend Content"
+    },
+    {
+      "parameters": {
+        "jsCode": "const existingContent = Buffer.from($('Get Backend File').item.json.content, 'base64').toString('utf8');\nconst newContent = $('Route by Type').item.json.code;\nconst sha = $('Get Backend File').item.json.sha;\n\n// Add separator and ticket info\nconst separator = \"\\n\\n# ========================================\\n\";\nconst ticketInfo = `# Test Case Added: ${$('Webhook').item.json.body[0].subject}\\n`;\nconst timestamp = `# Generated: ${new Date().toISOString()}\\n`;\nconst fullSeparator = separator + ticketInfo + timestamp + separator + \"\\n\";\n\nconst combined = existingContent + fullSeparator + newContent;\n\nreturn { \n  json: { \n    fileContent: combined,\n    sha: sha\n  } \n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2112,
+        272
+      ],
+      "id": "4c161203-3c71-4187-9fd4-bfeb4e81e3e2",
+      "name": "Append Backend Content"
     },
     {
       "parameters": {
@@ -145,9 +388,9 @@
           "cachedResultName": "Qa_Automaction_Openproject",
           "cachedResultUrl": "https://github.com/10DECODERS/Qa_Automaction_Openproject"
         },
-        "filePath": "=src/test/{{ $('Webhook').item.json.body[0].id }}.spec.ts",
-        "fileContent": "={{ $json.data }}",
-        "commitMessage": "Update the existing fie for test suite",
+        "filePath": "=src/test/{{ $('Webhook').item.json.body[0]._embedded.parent.id }}.frontend.spec.ts",
+        "fileContent": "={{ $json.fileContent }}",
+        "commitMessage": "=Appended Frontend Test - Ticket #{{ $('Webhook').item.json.body[0]._embedded.parent.id }}",
         "additionalParameters": {
           "branch": {
             "branch": "master"
@@ -157,12 +400,12 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        752,
-        0
+        -1872,
+        -48
       ],
-      "id": "d0dd492d-1eaf-4f41-9711-09e0131be799",
-      "name": "Edit a file1",
-      "webhookId": "718cf8e5-90a3-4036-8a35-c9dcf504aabb",
+      "id": "89caf873-6350-4b46-ba8f-54b7c2e392eb",
+      "name": "Update Frontend File",
+      "webhookId": "e0c02ae9-2825-4ebb-8f6c-096521d1af7a",
       "credentials": {
         "githubApi": {
           "id": "piEurmbiCVRjacja",
@@ -172,21 +415,63 @@
     },
     {
       "parameters": {
-        "jsCode": "var text = Buffer.from($input.first().json.content, 'base64').toString('utf8');\nreturn {\"data\": text};"
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/10DECODERS",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Qa_Automaction_Openproject",
+          "mode": "list",
+          "cachedResultName": "Qa_Automaction_Openproject",
+          "cachedResultUrl": "https://github.com/10DECODERS/Qa_Automaction_Openproject"
+        },
+        "filePath": "=src/test/{{ $('Webhook').item.json.body[0]._embedded.parent.id }}.backend.py",
+        "fileContent": "={{ $json.fileContent }}",
+        "commitMessage": "=Appended Backend Test - Ticket #{{ $('Webhook').item.json.body[0]._embedded.parent.id }}",
+        "additionalParameters": {
+          "branch": {
+            "branch": "master"
+          }
+        }
       },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
       "position": [
-        528,
-        0
+        -1872,
+        272
       ],
-      "id": "476c6e27-8013-4cf3-918b-2050734013e7",
-      "name": "Code1"
+      "id": "25c68349-b015-4945-84cb-fad170e794a6",
+      "name": "Update Backend File",
+      "webhookId": "52e2e83b-a9f0-41a9-95f3-22f126c78c20",
+      "credentials": {
+        "githubApi": {
+          "id": "piEurmbiCVRjacja",
+          "name": "GitHub account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "mergeByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        -1616,
+        16
+      ],
+      "id": "a543e0c0-aead-4309-a962-4ea0d6860b83",
+      "name": "Merge Results"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://dev-openproject.inside10d.com/api/v3/work_packages/{{ $('Webhook').item.json.body[0].id }}/activities ",
+        "url": "=https://dev-openproject.inside10d.com/api/v3/work_packages/{{ $('Webhook').item.json.body[0].id }}/activities",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -198,21 +483,17 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"comment\": {\n    \"raw\": \"Test case updated: '{{ $json.content.name }}'.\\nPath: {{ $json.content.path }}\\nURL: {{ $json.content.url }}\"\n  }\n}",
-        "options": {
-          "redirect": {
-            "redirect": {}
-          }
-        }
+        "jsonBody": "={\n  \"comment\": {\n    \"raw\": \"✅ Test cases generated and committed:\\n\\n📁 Frontend: `src/test/{{ $('Webhook').item.json.body[0]._embedded.parent.id }}.frontend.spec.ts`\\n📁 Backend: `src/test/{{ $('Webhook').item.json.body[0]._embedded.parent.id }}.backend.py`\\n\\n🔗 Repository: [Qa_Automaction_Openproject](https://github.com/10DECODERS/Qa_Automaction_Openproject)\\n\\n⏱️ Generated at: {{ new Date().toISOString() }}\"\n  }\n}",
+        "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        976,
-        96
+        -1376,
+        16
       ],
-      "id": "98c235b2-a478-4b03-a116-461bf1d399cb",
-      "name": "HTTP Request"
+      "id": "8438e41e-06e1-4e7a-9945-81fb1c354d28",
+      "name": "Post Comment to OpenProject"
     },
     {
       "parameters": {
@@ -222,24 +503,11 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        1424,
-        96
+        -1136,
+        16
       ],
-      "id": "2796b5bd-08f1-42e5-a37e-57159f87e6fc",
+      "id": "a3150aa6-895d-403e-b264-1ac923c9b8bd",
       "name": "Respond to Webhook"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Input: the incoming data array (from HTTP Request, etc.)\nconst items = $input.all();\n\n// Transform each item\nreturn items.map(item => {\n  // Parse the string inside \"data\"\n  const parsedData = JSON.parse(item.json.data);\n\n  return {\n    json: {\n      id: parsedData.id,\n      type: parsedData._type,\n      comment_raw: parsedData.comment.raw,\n      comment_html: parsedData.comment.html,\n      workPackageId: parsedData._links.workPackage?.href.split('/').pop(),\n      workPackageTitle: parsedData._links.workPackage?.title,\n      userId: parsedData._links.user?.href.split('/').pop(),\n      createdAt: parsedData.createdAt,\n      updatedAt: parsedData.updatedAt\n    }\n  };\n});\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1200,
-        96
-      ],
-      "id": "5757ebf1-478c-4db8-b354-5d1325319d3a",
-      "name": "Code2"
     }
   ],
   "pinData": {},
@@ -249,6 +517,17 @@
         [
           {
             "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Split Frontend and Backend",
             "type": "main",
             "index": 0
           }
@@ -266,80 +545,171 @@
         ]
       ]
     },
-    "AI Agent": {
+    "Split Frontend and Backend": {
       "main": [
         [
           {
-            "node": "Get a file",
+            "node": "Route by Type",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Create a file1": {
+    "Route by Type": {
       "main": [
         [
           {
-            "node": "HTTP Request",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get a file": {
-      "main": [
-        [
-          {
-            "node": "Code1",
+            "node": "Get Frontend File",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Create a file1",
+            "node": "Get Backend File",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Edit a file1": {
+    "Get Frontend File": {
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "Frontend File Exists?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code1": {
+    "Get Backend File": {
       "main": [
         [
           {
-            "node": "Edit a file1",
+            "node": "Backend File Exists?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request": {
+    "Frontend File Exists?": {
       "main": [
         [
           {
-            "node": "Code2",
+            "node": "Create Frontend File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append Frontend Content",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code2": {
+    "Backend File Exists?": {
+      "main": [
+        [
+          {
+            "node": "Create Backend File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append Backend Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Frontend File": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Backend File": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Append Frontend Content": {
+      "main": [
+        [
+          {
+            "node": "Update Frontend File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Backend Content": {
+      "main": [
+        [
+          {
+            "node": "Update Backend File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Frontend File": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Backend File": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Post Comment to OpenProject",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Comment to OpenProject": {
       "main": [
         [
           {
@@ -355,7 +725,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "a17496a9-2a81-420e-b6bd-d03fd368fb0f",
+  "versionId": "f886a0f2-c7a4-440f-8850-627d04164867",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c56517b2e497ed6ed05a6205c8b153dc2ed2dae047d1c01eebeacc6e6668076d"
