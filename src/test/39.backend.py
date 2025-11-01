@@ -43,3 +43,26 @@ def test_login_fails_with_password_missing_special_character():
         auth_service.login(username, password_missing_special)
     
     assert str(excinfo.value) == 'Invalid username or password. Please try again.'
+
+# ========================================
+# Test Case Added: Display error message for non-existent username
+# Generated: 2025-11-01T09:45:09.083Z
+
+
+# ========================================
+
+import pytest
+from unittest.mock import patch
+from your_app.auth import login_user
+
+@patch('your_app.auth.UserService.get_user_by_username')
+def test_login_non_existent_username(mock_get_user_by_username):
+    mock_get_user_by_username.return_value = None
+    non_existent_username = 'unknown_user'
+    valid_password = 'correct_password123'
+
+    response_data, status_code = login_user(non_existent_username, valid_password)
+
+    assert status_code == 401
+    assert response_data['message'] == 'Invalid username or password. Please try again.'
+    mock_get_user_by_username.assert_called_once_with(non_existent_username)
