@@ -55,3 +55,21 @@ describe('PasswordInput', () => {
     expect(passwordField).toHaveAttribute('type', 'password');
   });
 });
+
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import LoginPage from './LoginPage';
+
+describe('LoginPage responsive rendering', () => {
+  it('should render mobile-specific elements when in mobile view', () => {
+    render(<LoginPage isMobileView={true} />);
+    expect(screen.getByText('Back to Home')).toBeInTheDocument();
+    expect(screen.queryByText('Full Desktop Navigation')).not.toBeInTheDocument();
+  });
+
+  it('should render desktop-specific elements when in desktop view', () => {
+    render(<LoginPage isMobileView={false} />);
+    expect(screen.getByText('Full Desktop Navigation')).toBeInTheDocument();
+    expect(screen.queryByText('Back to Home')).not.toBeInTheDocument();
+  });
+});
