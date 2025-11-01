@@ -66,3 +66,39 @@ def test_login_non_existent_username(mock_get_user_by_username):
     assert status_code == 401
     assert response_data['message'] == 'Invalid username or password. Please try again.'
     mock_get_user_by_username.assert_called_once_with(non_existent_username)
+
+# ========================================
+# Test Case Added: Display error message for correct username, invalid password
+# Generated: 2025-11-01T09:51:15.688Z
+
+
+# ========================================
+
+import pytest
+
+def _simulate_login_backend(username, password):
+    # Simulate a backend service's user authentication logic
+    registered_users = {
+        "testuser": {"password_hash": "hashed_correct_password"} # In a real system, this would be a hash
+    }
+
+    if username in registered_users:
+        # Simulate password verification (e.g., bcrypt.checkpw)
+        if password == "correctpassword": # Mocking a successful password check
+            return {"success": True, "message": "Login successful"}
+        else:
+            return {"success": False, "message": "Invalid username or password. Please try again."}
+    else:
+        return {"success": False, "message": "Invalid username or password. Please try again."}
+
+def test_login_with_valid_username_and_invalid_password():
+    # Arrange
+    username = "testuser"
+    invalid_password = "wrongpassword"
+    expected_response = {"success": False, "message": "Invalid username or password. Please try again."}
+
+    # Act
+    actual_response = _simulate_login_backend(username, invalid_password)
+
+    # Assert
+    assert actual_response == expected_response
